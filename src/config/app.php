@@ -175,6 +175,10 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        Laravel\Fortify\FortifyServiceProvider::class,
+        App\Providers\FortifyServiceProvider::class,
+
+
     ],
 
     /*

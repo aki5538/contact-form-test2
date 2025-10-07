@@ -1,0 +1,115 @@
+body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background-color: #F9F8F7;
+    margin: 0;
+    padding: 0;
+}
+
+/* ヘッダー */
+.brand-header {
+    width: 1512px;
+    height: 100px;
+    background-color: #8B7969;
+    border: 1px solid #E0DFDE;
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 100px;
+    margin: 0 auto;
+}
+
+/* Contactタイトル */
+.contact-title {
+    position: absolute;
+    top: 150px;
+    left: 694px;
+    width: 121px;
+    height: 46px;
+    font-family: 'Inika', serif;
+    font-weight: 400;
+    font-size: 35px;
+    line-height: 100%;
+    color: #333;
+}
+
+/* フォーム */
+.contact-form {
+    max-width: 800px;
+    margin: 220px auto 50px;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+}
+
+/* テーブル */
+.contact-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.contact-table th {
+    width: 200px;
+    text-align: left;
+    padding: 12px;
+    background-color: #F0F0F0;
+    font-weight: normal;
+    vertical-align: top;
+}
+.contact-table td {
+    padding: 12px;
+}
+
+/* 入力欄 */
+.contact-table input[type="text"],
+.contact-table input[type="email"],
+.contact-table select,
+.contact-table textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* 名前・電話番号グループ */
+.name-group,
+.tel-group {
+    display: flex;
+    gap: 10px;
+}
+.tel-dash {
+    padding: 10px 4px;
+    line-height: 38px;
+}
+
+/* 必須マーク */
+.required {
+    color: red;
+    font-size: 12px;
+}
+
+/* エラーメッセージ */
+.error {
+    color: red;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+/* ボタン */
+.btn-confirm {
+    display: block;
+    margin: 30px auto 0;
+    padding: 12px 30px;
+    background-color: #8B7969;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.btn-confirm:hover {
+    background-color: #6e6356;
+}
