@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginRequest;
 use App\Http\Requests\ContactRequest;
 use App\Models\Category;
 use App\Models\Contact;
@@ -23,7 +24,8 @@ class ContactController extends Controller
     public function index()
     {
         $categories = Category::all(); // セレクトボックス用
-        return view('contact', compact('categories'));
+        $contacts = Contact::paginate(7); // ← お問い合わせ一覧（ページネーション）
+        return view('index', compact('contacts', 'categories'));
     }
 
     public function confirm(ContactRequest $request)
@@ -74,7 +76,7 @@ class ContactController extends Controller
                 $contact->first_name,
                 $contact->gender == 0 ? '男性' : ($contact->gender == 1 ? '女性' : 'その他'),
                 $contact->email,
-                $contact->tell,
+                $contact->tel,
                 $contact->address,
                 $contact->building,
                 $contact->message,
@@ -84,8 +86,11 @@ class ContactController extends Controller
         $filename = 'contacts_export_' . now()->format('Ymd_His') . '.csv';
         return Response::stream(function () use ($csvHeader, $csvData) {
             $stream = fopen('php://output', 'w');
+            mb_convert_variables('SJIS-win', 'UTF-8', $csvHeader);
             fputcsv($stream, $csvHeader);
+
             foreach ($csvData as $row) {
+                mb_convert_variables('SJIS-win', 'UTF-8', $row);
                 fputcsv($stream, $row);
             }
             fclose($stream);
@@ -110,6 +115,43 @@ class ContactController extends Controller
         }
 
         return $query;
+    }
+
+    public function login(LoginRequest $request)
+    {
+        if (Auth::attempt($request->only('email', 'password'))) {
+            return redirect()->intended('/admin');
+        }
+
+        return back()->withErrors([
+            'email' => '認証に失敗しました。',
+        ]);
+    }
+
+    public function create()
+    {
+        $categories = Category::all();
+        return view('contact', compact('categories'));
+    }
+
+    public function store(ContactRequest $request)
+    {
+        $inputs = $request->all();
+
+        // 保存処理
+        Contact::create([
+            'last_name' => $inputs['last_name'],
+            'first_name' => $inputs['first_name'],
+            'gender' => $inputs['gender'],
+            'email' => $inputs['email'],
+            'tel' => $inputs['tel'],
+            'address' => $inputs['address'],
+            'building' => $inputs['building'] ?? null,
+            'category_id' => $inputs['category_id'],
+            'message' => $inputs['message'],
+        ]);
+
+        return view('thanks');
     }
 }
 

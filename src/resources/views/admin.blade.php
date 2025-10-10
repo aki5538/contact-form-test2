@@ -13,14 +13,32 @@
     {{-- 検索フォーム --}}
     <form method="GET" action="{{ route('admin') }}" class="search-form">
         <input type="text" name="name" value="{{ request('name') }}" placeholder="名前">
+        <input type="text" name="email" value="{{ request('email') }}" placeholder="メールアドレス">
+
         <select name="gender">
             <option value="">性別</option>
             <option value="0" {{ request('gender') === '0' ? 'selected' : '' }}>男性</option>
             <option value="1" {{ request('gender') === '1' ? 'selected' : '' }}>女性</option>
             <option value="2" {{ request('gender') === '2' ? 'selected' : '' }}>その他</option>
         </select>
+
+        <select name="category_id">
+            <option value="">お問い合わせの種類</option>
+            @foreach($categories as $category)
+                <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                    {{ $category->name }}
+                </option>
+            @endforeach
+        </select>
+
+        <input type="date" name="date" value="{{ request('date') }}">
+
         <button type="submit">検索</button>
-        <a href="{{ route('admin') }}">リセット</a>
+        <a href="{{ route('admin') }}" class="reset-button">リセット</a>
+
+        <button type="submit" formaction="{{ route('admin.export') }}" formmethod="GET" class="export-button">
+            エクスポート
+        </button>
     </form>
 
     {{-- 一覧表示 --}}
@@ -66,10 +84,4 @@
         <button type="submit">CSVエクスポート</button>
     </form>
 
-    {{-- モーダルウィンドウ削除 --}}
-    <form method="POST" action="{{ route('contact.delete') }}">
-        @csrf
-        <input type="hidden" name="id" value="{{ $contact->id }}">
-        <button type="submit">削除</button>
-    </form>
 @endsection

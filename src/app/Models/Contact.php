@@ -15,10 +15,26 @@ class Contact extends Model
         'last_name',
         'gender',
         'email',
-        'tell',
+        'tel',
         'address',
         'building',
         'message'
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function getFullNameAttribute()
+    {
+        return $this->last_name . ' ' . $this->first_name;
+    }
+
+    public function getGenderLabelAttribute()
+    {
+        $labels = ['0' => '男性', '1' => '女性', '2' => 'その他'];
+        return $labels[$this->gender] ?? '未設定';
+    }
 
 }

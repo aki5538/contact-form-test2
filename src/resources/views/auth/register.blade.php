@@ -7,7 +7,6 @@
 
 <form method="POST" action="{{ route('register') }}">
     @csrf
-
     <label>お名前</label>
     <input type="text" name="name" value="{{ old('name') }}">
     @error('name')
@@ -21,7 +20,8 @@
     @enderror
 
     <label>パスワード</label>
-    <input type="password" name="password">
+    <input type="password" name="password" required>
+    
     @error('password')
         <div style="color: red;">{{ $message }}</div>
     @enderror

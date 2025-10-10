@@ -12,7 +12,6 @@
 
     <form method="POST" action="{{ route('contact.post') }}" class="contact-form">
         @csrf
-
         {{-- お名前（姓） --}}
         <div class="form-group">
             <label for="last_name">姓 <span class="required">※</span></label>
