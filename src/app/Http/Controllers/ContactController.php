@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
 
+
+
 class ContactController extends Controller
 {
     public function admin()
@@ -32,15 +34,15 @@ class ContactController extends Controller
     {
         $inputs = $request->all();
 
-        // 性別のラベル変換
+        // 性別ラベルを追加
         $genderLabels = ['0' => '男性', '1' => '女性', '2' => 'その他'];
         $inputs['gender_label'] = $genderLabels[$inputs['gender']] ?? '未設定';
 
-        // カテゴリ名の取得
+        // カテゴリー名を追加（DBから取得）
         $category = Category::find($inputs['category_id']);
-        $inputs['category_name'] = $category ? $category->name : '未選択';
-
-        return view('confirm', compact('inputs'));
+        $inputs['category_name'] = $category ? $category->name : '未設定';
+        
+        return view('confirm', ['inputs' => $inputs]);
     }
 
     public function destroy(Request $request)
@@ -51,7 +53,7 @@ class ContactController extends Controller
             $contact->delete();
         }
 
-        return redirect()->route('search')->with('message', '削除しました');
+        return redirect()->route('admin')->with('message', '削除しました');
     }
 
      // 🔹 検索一覧表示
@@ -128,10 +130,10 @@ class ContactController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        $categories = Category::all();
-        return view('contact', compact('categories'));
+        session()->flashInput($request->all());
+        return view('contact');
     }
 
     public function store(ContactRequest $request)

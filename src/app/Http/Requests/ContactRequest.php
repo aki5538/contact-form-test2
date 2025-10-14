@@ -24,7 +24,7 @@ class ContactRequest extends FormRequest
     public function rules()
     {
         return [
-             'last_name' => 'required|string|max:50',
+            'last_name' => 'required|string|max:50',
             'first_name' => 'required|string|max:50',
             'gender' => 'required|in:0,1,2',
             'email' => 'required|email|max:255',
@@ -49,4 +49,17 @@ class ContactRequest extends FormRequest
             'message.required' => 'お問い合わせ内容を入力してください。',
         ];
     }
+
+
+    protected function prepareForValidation()
+    {
+        $tel = trim($this->tel1) . '-' . trim($this->tel2) . '-' . trim($this->tel3);
+
+        $this->merge([
+            'tel' => $tel,
+        ]);
+
+        \Log::debug('バリデーション前: ' . json_encode($this->all()));
+    }
+
 }
