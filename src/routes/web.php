@@ -8,6 +8,7 @@ use App\Http\Controllers\AdminController;
 // ユーザー側（未ログインOK）
 Route::get('/', [ContactController::class, 'index']); // トップページ
 Route::get('/contact', [ContactController::class, 'create'])->name('contact.form'); // 入力画面
+Route::post('/contact/form', [ContactController::class, 'form'])->name('contact.form');
 Route::post('/confirm', [ContactController::class, 'confirm'])->name('contact.confirm'); // 確認画面
 Route::post('/thanks', [ContactController::class, 'store'])->name('contact.store'); // 保存→完了画面
 

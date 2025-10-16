@@ -8,11 +8,10 @@
 @endsection
 
 @section('content')
-    <div class="thanks-message">
-        <h1>お問い合わせありがとうございました</h1>
+    <h1>お問い合わせありがとうございます</h1>
 
-        <form method="GET" action="{{ route('contact') }}">
-            <button type="submit">HOME</button>
-        </form>
+    <div class="button-group">
+        <a href="{{ route('contact.form') }}">お問い合わせフォームに戻る</a>
+        <a href="{{ url('/') }}">トップページへ</a>
     </div>
 @endsection

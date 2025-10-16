@@ -28,7 +28,9 @@ class ContactRequest extends FormRequest
             'first_name' => 'required|string|max:50',
             'gender' => 'required|in:0,1,2',
             'email' => 'required|email|max:255',
-            'tel' => 'required|string|max:20',
+            'tel1' => 'required|digits_between:2,4',
+            'tel2' => 'required|digits_between:2,4',
+            'tel3' => 'required|digits_between:2,4',
             'address' => 'required|string|max:255',
             'building' => 'nullable|string|max:255',
             'category_id' => 'required|exists:categories,id',
@@ -53,13 +55,12 @@ class ContactRequest extends FormRequest
 
     protected function prepareForValidation()
     {
-        $tel = trim($this->tel1) . '-' . trim($this->tel2) . '-' . trim($this->tel3);
+        $tel = $this->input('tel1') . '-' . $this->input('tel2') . '-' . $this->input('tel3');
 
+        // tel のみ結合して追加。元の tel1〜3 は触らない！
         $this->merge([
             'tel' => $tel,
         ]);
-
-        \Log::debug('バリデーション前: ' . json_encode($this->all()));
     }
 
 }

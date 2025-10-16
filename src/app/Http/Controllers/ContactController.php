@@ -2,145 +2,45 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\LoginRequest;
-use App\Http\Requests\ContactRequest;
-use App\Models\Category;
-use App\Models\Contact;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Response;
-
-
+use App\Http\Requests\ContactRequest;
+use App\Models\Contact;
+use App\Models\Category;
 
 
 class ContactController extends Controller
 {
-    public function admin()
-    {
-        $contacts = Contact::with('category')->paginate(7);
-        $categories = Category::all();
-        $csvData = Contact::all(); // エクスポート用
-
-        return view('admin', compact('contacts', 'categories', 'csvData'));
-    }
-
+    // トップページ
     public function index()
     {
-        $categories = Category::all(); // セレクトボックス用
-        $contacts = Contact::paginate(7); // ← お問い合わせ一覧（ページネーション）
-        return view('index', compact('contacts', 'categories'));
+        $categories = Category::all();
+        return view('index', compact('categories'));
     }
 
-    public function confirm(ContactRequest $request)
+    // 入力画面（初回表示）
+    public function create()
     {
-        $inputs = $request->all();
-
-        // 性別ラベルを追加
-        $genderLabels = ['0' => '男性', '1' => '女性', '2' => 'その他'];
-        $inputs['gender_label'] = $genderLabels[$inputs['gender']] ?? '未設定';
-
-        // カテゴリー名を追加（DBから取得）
-        $category = Category::find($inputs['category_id']);
-        $inputs['category_name'] = $category ? $category->name : '未設定';
-        
-        return view('confirm', ['inputs' => $inputs]);
-    }
-
-    public function destroy(Request $request)
-    {
-        $contact = Contact::find($request->id);
-
-        if ($contact) {
-            $contact->delete();
-        }
-
-        return redirect()->route('admin')->with('message', '削除しました');
-    }
-
-     // 🔹 検索一覧表示
-    public function search(Request $request)
-    {
-        $query = $this->getSearchQuery($request, Contact::query());
-        $contacts = $query->paginate(7);
-        return view('admin', compact('contacts'));
-    }
-
-     // 🔹 CSVエクスポート
-    public function export(Request $request)
-    {
-        $query = $this->getSearchQuery($request, Contact::query());
-        $contacts = $query->get();
-
-        $csvHeader = ['ID', '姓', '名', '性別', 'メールアドレス', '電話番号', '住所', '建物名', 'お問い合わせ内容'];
-        $csvData = $contacts->map(function ($contact) {
-            return [
-                $contact->id,
-                $contact->last_name,
-                $contact->first_name,
-                $contact->gender == 0 ? '男性' : ($contact->gender == 1 ? '女性' : 'その他'),
-                $contact->email,
-                $contact->tel,
-                $contact->address,
-                $contact->building,
-                $contact->message,
-            ];
-        });
-
-        $filename = 'contacts_export_' . now()->format('Ymd_His') . '.csv';
-        return Response::stream(function () use ($csvHeader, $csvData) {
-            $stream = fopen('php://output', 'w');
-            mb_convert_variables('SJIS-win', 'UTF-8', $csvHeader);
-            fputcsv($stream, $csvHeader);
-
-            foreach ($csvData as $row) {
-                mb_convert_variables('SJIS-win', 'UTF-8', $row);
-                fputcsv($stream, $row);
-            }
-            fclose($stream);
-        }, 200, [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ]);
-    }
-
-     // 🔹 共通検索処理（責務分離）
-    private function getSearchQuery(Request $request, $query)
-    {
-        if (!empty($request->name)) {
-            $query->where(function ($q) use ($request) {
-                $q->where('first_name', 'like', '%' . $request->name . '%')
-                  ->orWhere('last_name', 'like', '%' . $request->name . '%');
-            });
-        }
-
-        if (!empty($request->gender)) {
-            $query->where('gender', $request->gender);
-        }
-
-        return $query;
-    }
-
-    public function login(LoginRequest $request)
-    {
-        if (Auth::attempt($request->only('email', 'password'))) {
-            return redirect()->intended('/admin');
-        }
-
-        return back()->withErrors([
-            'email' => '認証に失敗しました。',
-        ]);
-    }
-
-    public function create(Request $request)
-    {
-        session()->flashInput($request->all());
         return view('contact');
     }
 
+    // 確認画面から戻る（入力値を復元）
+    public function form(Request $request)
+    {
+        return view('contact')->withInput();
+    }
+
+    // 確認画面の表示（バリデーション含む）
+    public function confirm(ContactRequest $request)
+    {
+        $inputs = $request->all();
+        return view('contact.confirm', compact('inputs'));
+    }
+
+    // 保存処理 → 完了画面
     public function store(ContactRequest $request)
     {
         $inputs = $request->all();
 
-        // 保存処理
         Contact::create([
             'last_name' => $inputs['last_name'],
             'first_name' => $inputs['first_name'],
@@ -153,7 +53,41 @@ class ContactController extends Controller
             'message' => $inputs['message'],
         ]);
 
-        return view('thanks');
+        return view('contact.thanks');
+    }
+
+    // 管理画面（ログイン後）
+    public function admin()
+    {
+        $contacts = Contact::latest()->paginate(10);
+        return view('admin.index', compact('contacts'));
+    }
+
+    // 検索機能（管理者用）
+    public function search(Request $request)
+    {
+        $keyword = $request->input('keyword');
+        $contacts = Contact::where('last_name', 'like', "%{$keyword}%")
+            ->orWhere('first_name', 'like', "%{$keyword}%")
+            ->orWhere('email', 'like', "%{$keyword}%")
+            ->paginate(10);
+
+        return view('admin.index', compact('contacts'));
+    }
+
+    // 削除機能（管理者用）
+    public function delete(Request $request)
+    {
+        $id = $request->input('id');
+        Contact::findOrFail($id)->delete();
+        return redirect()->route('admin')->with('status', '削除しました');
+    }
+
+    // CSVエクスポート（管理者用）
+    public function export()
+    {
+        // 実装は後で追加（Laravel Excelなど）
+        return response()->download(storage_path('exports/contacts.csv'));
     }
 }
 
